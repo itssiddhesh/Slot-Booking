@@ -95,8 +95,9 @@ function App() {
 
           request.execute(event=>{
             window.open(event.htmlLink)
+            
           })
-          
+          alert(`Appointment Booked on ${value.value.toDateString()} at ${selectTime}`)
         })
 
       })
@@ -104,7 +105,6 @@ function App() {
   }
 
   const handleSelectTime = (e) => {
-    e.target.variant = "contained";
     setSelectTime(e.target.textContent);
   };
 
@@ -116,6 +116,7 @@ function App() {
 
   return (
     <div className="App">
+      {console.log(dateTime)}
       <nav className="navbar">
         <button>Logout</button>
       </nav>
