@@ -1,16 +1,66 @@
+@import url("https://cdn.syncfusion.com/ej2/material.css");
 fieldset{
-  width: 200px;
+  width: 240px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: grey;
+  border: 1px solid grey;
 }
 
 .navbar{
-  background-color: brown;
+  margin: 0;
+  background-color: rgb(233, 14, 61);
   padding: 10px;
+  padding-left: 0;
+  width: 100%;
 }
 
 .main{
+  padding-top: 50px;
   display: flex;
   flex-direction: column;
   justify-content: space-around;
   align-items: center;
   padding-bottom: 40px;
+  margin: 5px;
+}
+
+.booking-time{
+  display: grid;
+  grid-template-columns: auto auto auto auto auto auto;
+  align-items: center;
+  text-align: center;
+}
+
+
+.timeslot{
+  margin: 17px;
+  padding: 8px;
+  border-radius: 5px;
+  background-color: white;
+  border: 1px solid grey;
+  color: grey;
+}
+
+.book-btn{
+  background-color: rgb(233, 14, 61);
+  color: white;
+  font-size: larger;
+  padding: 5px;
+  border: 0;
+  margin-top: 40px;
+}
+
+input,select{
+  border: none;
+  width: 100%;
+  padding: 3px;
+  margin: 0;
+}
+
+legend{
+  font-size: 60%;
+  color: grey;
 }

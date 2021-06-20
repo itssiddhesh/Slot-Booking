@@ -1,15 +1,21 @@
 import "./App.css";
-import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
-import { useState } from "react";
-import Button from "@material-ui/core/Button";
+import { useEffect, useState } from "react";
+import { CalendarComponent} from '@syncfusion/ej2-react-calendars';
+import { gapi } from 'gapi-script';
 
 function App() {
-  const [value, onchange] = useState(new Date());
-  const [select, setSelect] = useState("");
+  var CLIENT_ID ="217599394783-d73mdf1ttibaqcpbc9dvkkh0d7if68cr.apps.googleusercontent.com";
+  var API_KEY = "AIzaSyBI0lXwGMxTBk0-bHRvqHFao3oOxLOgLkQ";
+  var DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"];
+  var SCOPES = "https://www.googleapis.com/auth/calendar.events";
+
+  const [value, onchange] = useState('');
+  const [select, setSelect] = useState("Training Room");
   const [name, setName] = useState("");
   const [des, setDes] = useState("");
-  const [selectTime, setSelectTime] = useState([]);
+  const [selectTime, setSelectTime] = useState('');
+  const [dateTime, setdateTime] = useState('');
 
   const times = [
     { time: "10:00 AM" },
@@ -30,39 +36,98 @@ function App() {
     { time: "5:30 PM" },
     { time: "6:00 PM" },
     { time: "6:30 PM" },
-    { time: "7:00 PM" },
   ];
 
   const handleSelect = (e) => {
     setSelect(e.target.value);
   };
 
-  const handleBooking=()=>{
-    var room = select;
-    var description = des;
-    var employee = name;
-    
+
+  const handleClick = () => {
+    if(!dateTime || !value.value || des==='' || name===''|| selectTime==='' || !value){
+      alert('Give all the credentials!!');
+    }else{
+      gapi.load('client:auth2',()=>{
+        console.log('loaded client');
+
+        gapi.client.init({
+          apiKey: API_KEY,
+          clientId: CLIENT_ID,
+          discoveryDocs: DISCOVERY_DOCS,
+          scope: SCOPES,
+        })
+
+        gapi.client.load('calendar','v3',()=>console.log('cool'))
+
+        gapi.auth2.getAuthInstance().signIn().then(()=>{
+          var event = {
+            'summary': `Training Room Affle(${name})`,
+            'location': 'Affle (India) Limited,Gurgaon,Delhi',
+            'description': `${des}`,
+            'start': {
+              'dateTime': `${dateTime}`,
+              'timeZone': 'Asia/Kolkata'
+            },
+            'end': {
+              'dateTime': `${dateTime}`,
+              'timeZone': 'Asia/Kolkata'
+            },
+            'recurrence': [
+              'RRULE:FREQ=DAILY;COUNT=2'
+            ],
+            'attendees': [
+              {'email': 'lpage@example.com'},
+              {'email': 'sbrin@example.com'}
+            ],
+            'reminders': {
+              'useDefault': false,
+              'overrides': [
+                {'method': 'email', 'minutes': 24 * 60},
+                {'method': 'popup', 'minutes': 10}
+              ]
+            }
+          }
+
+          var request = gapi.client.calendar.events.insert({
+            'calendarId': 'primary',
+            'resource': event,
+          })
+
+          request.execute(event=>{
+            window.open(event.htmlLink)
+          })
+          
+        })
+
+      })
+    }
   }
 
-  const handleSelectType=(e)=>{
-    e.target.variant='secondary'
-    setSelectTime([...selectTime,e.target.id])
-    console.log(e.target.id);
-  }
+  const handleSelectTime = (e) => {
+    e.target.variant = "contained";
+    setSelectTime(e.target.textContent);
+  };
+
+  useEffect(()=>{
+    if(value.value){
+      setdateTime(value.value.toISOString());
+    }
+  },[value])
 
   return (
     <div className="App">
-      <nav className="navbar">Book A Meeting</nav>
+      <nav className="navbar">
+        <button>Logout</button>
+      </nav>
       <div className="main">
         <h2>Meeting Room Booking</h2>
-        <fieldset>
+        <fieldset style={{margin: '4px'}}>
           <legend>Meeting Room</legend>
-          <select value={select} onChange={handleSelect}>
-            <option>Select Meeting Type</option>
+          <select value={select} onChange={handleSelect} required>
             <option>Training Room</option>
           </select>
         </fieldset>
-        <fieldset>
+        <fieldset style={{margin: '4px'}}>
           <legend>Name</legend>
           <input
             type="text"
@@ -71,9 +136,10 @@ function App() {
               setName(e.target.value);
             }}
             placeholder="Enter Your Name"
+            required
           />
         </fieldset>
-        <fieldset>
+        <fieldset style={{margin: '4px'}}>
           <legend>Meeting Description</legend>
           <input
             type="text"
@@ -82,29 +148,36 @@ function App() {
               setDes(e.target.value);
             }}
             placeholder="Enter meeting description"
+            required
           />
         </fieldset>
-        <Calendar onChange={onchange} value={value} />
-        <h5>{value.toDateString()}</h5>
+        <div style={{marginTop: '10px'}}>
+        <CalendarComponent value={value} onChange={onchange} />
+        </div>
+        <h5>{value.value && value.value.toDateString()}</h5>
         <h3>Please select your preferred slot</h3>
-        <div
-          style={{
-            width: "80%",
-            padding: "10px",
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "center",
-            alignContent: "center",
-            alignItems: "center",
-          }}
-        >
-          {times.map((time,i) => (
-            <Button key={i} id={`time${i}`} variant="outlined" color="primary" onClick={handleSelectType}>
+        <div className='booking-time'>
+          {times.map((time, i) => (
+            <button
+              key={i}
+              id={`time${i}`}
+              className='timeslot'
+              onClick={handleSelectTime}
+            >
               {time.time}
-            </Button>
+            </button>
           ))}
         </div>
-        <Button variant="contained" color="secondary" onClick={handleBooking} >BOOK APPOINTMENT</Button>
+        <div>
+        <button
+              id='time18'
+              className='timeslot'
+              onClick={handleSelectTime}
+            >
+              7:00 PM
+            </button>
+        </div>
+        <button className='book-btn' onClick={handleClick}>BOOK APPOINTMENT</button>
       </div>
     </div>
   );
